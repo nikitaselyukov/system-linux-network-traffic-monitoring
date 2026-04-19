@@ -1,0 +1,4 @@
+rootfs/usr/local/bin/snapshot_worker
+
+__pycache__/
+*.pyc
