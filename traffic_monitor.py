@@ -108,6 +108,7 @@ class TrafficMonitorApp:
         self.capture_thread: threading.Thread | None = None
         self.ui_events: queue.Queue[dict] = queue.Queue()
         self.blocked_ips: set[str] = set()
+        self.ui_pump_job: str | None = None
 
         self.self_ips = self._get_local_ipv4s()
         self.gateway_ip = self._get_default_gateway()
@@ -160,7 +161,7 @@ class TrafficMonitorApp:
 
     def _schedule_ui_pump(self) -> None:
         self._process_ui_events()
-        self.root.after(120, self._schedule_ui_pump)
+        self.ui_pump_job = self.root.after(120, self._schedule_ui_pump)
 
     def _process_ui_events(self) -> None:
         while True:
@@ -200,6 +201,8 @@ class TrafficMonitorApp:
 
     def stop_monitoring(self) -> None:
         self.stop_event.set()
+        if self.capture_thread and self.capture_thread.is_alive():
+            self.capture_thread.join(timeout=1.5)
         self.start_btn.configure(state=tk.NORMAL)
         self.stop_btn.configure(state=tk.DISABLED)
         self.ui_events.put({"type": "status", "text": "Status: stopped"})
@@ -209,8 +212,12 @@ class TrafficMonitorApp:
         def stop_filter(_packet):
             return self.stop_event.is_set()
 
-        sniff(prn=self.packet_callback, store=False, stop_filter=stop_filter)
-
+        try:
+            while not self.stop_event.is_set():
+                sniff(prn=self.packet_callback, store=False, stop_filter=stop_filter, timeout=1)
+        except Exception as exc:
+            logging.exception("Traffic capture failed: %s", exc)
+            self.ui_events.put({"type": "status", "text": "Status: error during capture"})
     def packet_callback(self, packet) -> None:
         if IP not in packet:
             return
