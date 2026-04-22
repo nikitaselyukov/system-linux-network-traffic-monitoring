@@ -117,20 +117,20 @@ class TrafficMonitorApp:
         self._schedule_ui_pump()
 
     def _build_ui(self) -> None:
-        toolbar = ttk.Frame(self.root)
+        toolbar = ttk.Frame(self.root, style="Dark.TFrame")
         toolbar.pack(fill=tk.X, padx=10, pady=8)
 
-        self.start_btn = ttk.Button(toolbar, text="Start Monitor", command=self.start_monitoring)
-        self.stop_btn = ttk.Button(toolbar, text="Stop Monitor", command=self.stop_monitoring, state=tk.DISABLED)
-        self.block_btn = ttk.Button(toolbar, text="Block Selected IP", command=self.block_ip)
-        self.unblock_btn = ttk.Button(toolbar, text="Unblock Selected IP", command=self.unblock_ip)
+        self.start_btn = ttk.Button(toolbar, text="Start Monitor", command=self.start_monitoring, style="Dark.TButton")
+        self.stop_btn = ttk.Button(toolbar, text="Stop Monitor", command=self.stop_monitoring, state=tk.DISABLED, style="Dark.TButton")
+        self.block_btn = ttk.Button(toolbar, text="Block Selected IP", command=self.block_ip, style="Dark.TButton")
+        self.unblock_btn = ttk.Button(toolbar, text="Unblock Selected IP", command=self.unblock_ip, style="Dark.TButton")
 
         self.start_btn.pack(side=tk.LEFT, padx=4)
         self.stop_btn.pack(side=tk.LEFT, padx=4)
         self.block_btn.pack(side=tk.LEFT, padx=4)
         self.unblock_btn.pack(side=tk.LEFT, padx=4)
 
-        content = ttk.Frame(self.root)
+        content = ttk.Frame(self.root, style="Dark.TFrame")
         content.pack(fill=tk.BOTH, expand=True, padx=10, pady=8)
 
         self.packet_table = self._mk_table(content, "Packet Log", ("src", "port", "size"), ("Source IP", "Port", "Size"), 0)
@@ -144,15 +144,15 @@ class TrafficMonitorApp:
         self.blocked_table = self._mk_table(content, "Blocked", ("src",), ("Blocked IP",), 2)
 
         self.status_var = tk.StringVar(value="Status: idle")
-        ttk.Label(self.root, textvariable=self.status_var).pack(fill=tk.X, padx=10, pady=(0, 8))
+        ttk.Label(self.root, textvariable=self.status_var, style="Dark.TLabel").pack(fill=tk.X, padx=10, pady=(0, 8))
 
     def _mk_table(self, parent, title, columns, headings, col_idx):
-        frame = ttk.LabelFrame(parent, text=title)
+        frame = ttk.LabelFrame(parent, text=title, style="Dark.TLabelframe")
         frame.grid(row=0, column=col_idx, sticky="nsew", padx=6)
         parent.columnconfigure(col_idx, weight=1)
         parent.rowconfigure(0, weight=1)
 
-        table = ttk.Treeview(frame, columns=columns, show="headings", height=24)
+        table = ttk.Treeview(frame, columns=columns, show="headings", height=24, style="Dark.Treeview")
         for col, heading in zip(columns, headings):
             table.heading(col, text=heading)
             table.column(col, width=160, anchor=tk.CENTER)
